@@ -1,0 +1,7 @@
+# Bỏ qua các file/thư mục không cần lên GitHub
+/vendor/
+*.log
+*.zip
+*.env
+.DS_Store
+Thumbs.db
