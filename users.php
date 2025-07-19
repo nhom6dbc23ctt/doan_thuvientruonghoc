@@ -1,56 +1,64 @@
 <?php
 session_start();
 include 'db.php';
-
-// Chỉ admin mới truy cập được
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
     die("Bạn không có quyền truy cập trang này!");
 }
 
-// Xử lý xóa tài khoản
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
-    // Không cho phép xóa chính mình
     if ($id == $_SESSION['user']['id']) {
-        $msg = "<p class='text-danger'>❌ Không thể tự xóa tài khoản đang đăng nhập!</p>";
+        $msg = "<div class='alert alert-danger'>❌ Không thể xóa chính mình!</div>";
     } else {
         mysqli_query($conn, "DELETE FROM users WHERE id=$id");
-        $msg = "<p class='text-success'>✅ Đã xóa tài khoản thành công!</p>";
+        $msg = "<div class='alert alert-warning'>⚠️ Đã xóa tài khoản!</div>";
     }
 }
 
-// Lấy danh sách user
 $result = mysqli_query($conn, "SELECT * FROM users ORDER BY role DESC, username ASC");
+include 'header.php';
 ?>
-<?php include 'header.php'; ?>
-<h2>Danh sách người dùng</h2>
 
-<?php if (isset($msg)) echo $msg; ?>
-
-<table class="table table-bordered">
-    <tr>
+<div class="container-box">
+  <h2>👥 Danh sách người dùng</h2>
+  <?php if(isset($msg)) echo $msg; ?>
+  <table class="table table-hover table-bordered">
+    <thead class="table-secondary">
+      <tr>
         <th>ID</th>
         <th>Tên đăng nhập</th>
         <th>Vai trò</th>
         <th>Mật khẩu</th>
         <th>Hành động</th>
-    </tr>
-    <?php while($user = mysqli_fetch_assoc($result)): ?>
+      </tr>
+    </thead>
+    <tbody>
+      <?php while($user = mysqli_fetch_assoc($result)): ?>
         <tr>
-            <td><?= $user['id'] ?></td>
-            <td><?= $user['username'] ?></td>
-            <td><?= $user['role'] ?></td>
-            <td><?= $user['password'] ?></td>
-            <td>
-                <?php if ($user['id'] != $_SESSION['user']['id']): ?>
-                    <a href="?delete=<?= $user['id'] ?>" onclick="return confirm('Xóa tài khoản này?');" class="btn btn-danger btn-sm">Xóa</a>
-                <?php else: ?>
-                    <span class="text-muted">Đang đăng nhập</span>
-                <?php endif; ?>
-            </td>
+          <td><?= $user['id'] ?></td>
+          <td><?= htmlspecialchars($user['username']) ?></td>
+          <td>
+            <?php if($user['role']=='admin'): ?>
+              <span class="badge bg-danger">Admin</span>
+            <?php elseif($user['role']=='librarian'): ?>
+              <span class="badge bg-info text-dark">Thủ thư</span>
+            <?php else: ?>
+              <span class="badge bg-secondary">User</span>
+            <?php endif; ?>
+          </td>
+          <td><?= $user['password'] ?></td>
+          <td>
+            <?php if ($user['id'] != $_SESSION['user']['id']): ?>
+              <a href="?delete=<?= $user['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Xóa tài khoản này?')">Xóa</a>
+            <?php else: ?>
+              <span class="text-muted">Đang đăng nhập</span>
+            <?php endif; ?>
+          </td>
         </tr>
-    <?php endwhile; ?>
-</table>
+      <?php endwhile; ?>
+    </tbody>
+  </table>
+  <a href="dashboard.php" class="btn btn-secondary">⬅ Quay lại Dashboard</a>
+</div>
 
-<a href="dashboard.php" class="btn btn-secondary">⬅ Quay lại Dashboard</a>
 <?php include 'footer.php'; ?>

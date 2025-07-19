@@ -9,18 +9,29 @@ if (isset($_POST['book_id'])) {
     $today = date('Y-m-d');
     mysqli_query($conn, "INSERT INTO borrow_records (user_id, book_id, borrow_date) VALUES ($uid, $bid, '$today')");
     mysqli_query($conn, "UPDATE books SET quantity = quantity - 1 WHERE id = $bid");
+    $msg = "<div class='alert alert-success'>✅ Mượn sách thành công!</div>";
 }
 
 $books = mysqli_query($conn, "SELECT * FROM books WHERE quantity > 0");
+include 'header.php';
 ?>
-<?php include 'header.php'; ?>
-<h3>Mượn sách</h3>
-<form method="post">
-    <select name="book_id" class="form-select mb-2">
+
+<div class="container-box">
+  <h2>✅ Mượn sách</h2>
+  <?php if(isset($msg)) echo $msg; ?>
+  <form method="post" class="row g-2">
+    <div class="col-md-8">
+      <select name="book_id" class="form-select">
         <?php while($b = mysqli_fetch_assoc($books)): ?>
-        <option value="<?= $b['id'] ?>"><?= $b['title'] ?> - <?= $b['author'] ?></option>
+        <option value="<?= $b['id'] ?>"><?= $b['title'] ?> - <?= $b['author'] ?> (Còn <?= $b['quantity'] ?>)</option>
         <?php endwhile; ?>
-    </select>
-    <button class="btn btn-primary">Mượn</button>
-</form>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button class="btn btn-primary w-100">Mượn ngay</button>
+    </div>
+  </form>
+  <a href="dashboard.php" class="btn btn-secondary mt-3">⬅ Quay lại Dashboard</a>
+</div>
+
 <?php include 'footer.php'; ?>
