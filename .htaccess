@@ -1,0 +1,4 @@
+# Chạy index.php làm mặc định
+DirectoryIndex index.php
+# Bật rewrite
+RewriteEngine On
