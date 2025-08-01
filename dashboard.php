@@ -52,11 +52,19 @@ if (!isset($_SESSION['user'])) {
     <div class="col-md-6">
       <a href="history.php" class="btn btn-outline-info btn-menu">📜 Lịch sử mượn sách</a>
     </div>
-    <?php if ($_SESSION['user']['role']=='admin'): ?>
+
+    <?php if (in_array($_SESSION['user']['role'], ['admin', 'librarian'])): ?>
+    <div class="col-md-6">
+      <a href="statistics.php" class="btn btn-dark btn-menu">📊 Thống kê</a>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($_SESSION['user']['role'] == 'admin'): ?>
     <div class="col-md-6">
       <a href="users.php" class="btn btn-warning btn-menu">👥 Quản lý người dùng</a>
     </div>
     <?php endif; ?>
+
     <div class="col-md-6">
       <a href="index.php" target="_blank" class="btn btn-secondary btn-menu">🌐 Xem trang Public</a>
     </div>

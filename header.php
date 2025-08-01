@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,6 +25,7 @@
       margin-top: 20px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -35,13 +41,20 @@
           <li class="nav-item"><a class="nav-link" href="dashboard.php">🏠 Home</a></li>
           <li class="nav-item"><a class="nav-link" href="borrow.php">✅ Mượn sách</a></li>
           <li class="nav-item"><a class="nav-link" href="return.php">↩️ Trả sách</a></li>
+
           <?php if ($_SESSION['user']['role'] != 'user'): ?>
               <li class="nav-item"><a class="nav-link" href="books.php">📚 Quản lý sách</a></li>
           <?php endif; ?>
+
+          <?php if (in_array($_SESSION['user']['role'], ['admin', 'librarian'])): ?>
+              <li class="nav-item"><a class="nav-link" href="statistics.php">📊 Thống kê</a></li>
+          <?php endif; ?>
+
           <?php if ($_SESSION['user']['role'] == 'admin'): ?>
               <li class="nav-item"><a class="nav-link" href="register.php">➕ Tạo User</a></li>
               <li class="nav-item"><a class="nav-link" href="users.php">👥 Danh sách User</a></li>
           <?php endif; ?>
+
           <li class="nav-item"><a class="nav-link text-warning" href="logout.php">🚪 Đăng xuất</a></li>
       </ul>
     </div>

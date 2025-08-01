@@ -34,15 +34,16 @@ if(isset($_POST['checkout'])){
             if($bk && mysqli_num_rows($bk)>0){
                 $b=mysqli_fetch_assoc($bk);
                 if($b['quantity']>0){
-                    mysqli_query($conn,"INSERT INTO borrow_records(user_id,book_id,borrow_date,return_date) VALUES($user_id,$bid,CURDATE(),NULL)");
-                    mysqli_query($conn,"UPDATE books SET quantity=quantity-1 WHERE id=$bid");
+                    // status = pending
+                    mysqli_query($conn,"INSERT INTO borrow_records(user_id,book_id,borrow_date,status) 
+                        VALUES($user_id,$bid,CURDATE(),'pending')");
                 } else {
                     $msg.="⚠️ ".$b['title']." đã hết<br>";
                 }
             }
         }
         $_SESSION['cart']=[];
-        $msg.="✅ Đã mượn các sách còn đủ";
+        $msg.="✅ Yêu cầu mượn đã gửi, vui lòng đợi thủ thư duyệt!";
     }
 }
 
@@ -83,7 +84,7 @@ if(!empty($_SESSION['cart'])){
       <?php endwhile;?>
     </tbody>
   </table>
-  <button type="submit" name="checkout" class="btn btn-success">✅ Xác nhận mượn tất cả</button>
+  <button type="submit" name="checkout" class="btn btn-success">✅ Gửi yêu cầu mượn tất cả</button>
   </form>
   <?php endif;?>
 </div>

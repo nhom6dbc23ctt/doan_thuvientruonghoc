@@ -1,5 +1,4 @@
 <?php
-header("Content-Type: text/html; charset=UTF-8");
 session_start();
 include 'db.php';
 mysqli_set_charset($conn,"utf8mb4");
@@ -18,33 +17,29 @@ if($role=='librarian' && isset($_POST['select_user'])){
     $user_id = intval($_POST['select_user']);
 }
 
-// Trả sách
+// Yêu cầu trả sách → status = return_pending
 if(isset($_GET['record_id'])){
     $record_id=intval($_GET['record_id']);
-    $r=mysqli_query($conn,"SELECT book_id FROM borrow_records WHERE id=$record_id AND return_date IS NULL");
+    $r=mysqli_query($conn,"SELECT book_id,status FROM borrow_records WHERE id=$record_id AND status='borrowed'");
     if($r && mysqli_num_rows($r)>0){
-        $row=mysqli_fetch_assoc($r);
-        $book_id=intval($row['book_id']);
-        // Update return_date
-        $u1=mysqli_query($conn,"UPDATE borrow_records SET return_date=CURDATE() WHERE id=$record_id");
-        // Update quantity
-        $u2=mysqli_query($conn,"UPDATE books SET quantity=quantity+1 WHERE id=$book_id");
-        if($u1 && $u2){
-            $msg="✅ Đã trả sách thành công!";
-        }else{
+        $sql_update="UPDATE borrow_records SET status='return_pending' WHERE id=$record_id";
+        mysqli_query($conn,$sql_update);
+        if(mysqli_error($conn)){
             $msg="❌ Lỗi SQL: ".mysqli_error($conn);
+        } else {
+            $msg="✅ Đã gửi yêu cầu trả sách!";
         }
     } else {
-        $msg="⚠️ Không tìm thấy record hoặc đã trả rồi!";
+        $msg="⚠️ Không tìm thấy bản ghi đang mượn!";
     }
 }
 
-// Lấy sách đang mượn
+// Lấy sách đang mượn (status=borrowed)
 $records=mysqli_query($conn,"
-  SELECT br.id,b.title,b.author,br.borrow_date
+  SELECT br.id,b.title,b.author,br.borrow_date,br.status
   FROM borrow_records br
   JOIN books b ON br.book_id=b.id
-  WHERE br.user_id=$user_id AND br.return_date IS NULL
+  WHERE br.user_id=$user_id AND br.status='borrowed'
 ");
 $members=($role=='librarian')?mysqli_query($conn,"SELECT id,username FROM users WHERE role='user'"):null;
 ?>
@@ -83,7 +78,7 @@ $members=($role=='librarian')?mysqli_query($conn,"SELECT id,username FROM users 
           <td><?=htmlspecialchars($r['title'])?></td>
           <td><?=htmlspecialchars($r['author'])?></td>
           <td><?=$r['borrow_date']?></td>
-          <td><a href="return.php?record_id=<?=$r['id']?>" class="btn btn-warning btn-sm" onclick="return confirm('Xác nhận trả sách?');">↩️ Trả</a></td>
+          <td><a href="return.php?record_id=<?=$r['id']?>" class="btn btn-warning btn-sm" onclick="return confirm('Gửi yêu cầu trả sách?');">↩️ Trả</a></td>
         </tr>
         <?php endwhile;?>
       <?php else:?>
